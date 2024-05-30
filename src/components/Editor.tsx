@@ -1,10 +1,9 @@
-import { ElementRef, Fragment, ReactNode } from "react";
+import { ReactNode } from "react";
 import style from "./Editor.module.css";
 import { Page } from "./Page";
 import { usePages } from "../features/pages/usePages";
 import { nanoid } from "nanoid";
 import { PageModel } from "../features/pages/pageTypes";
-import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 
 export function Editor() {
   const { pages, setPages } = usePages();
@@ -20,28 +19,58 @@ export function Editor() {
     <div className={style["editor"]}>
       <Drawer>
         <button onClick={handleAddPage}>Add page</button>
-        <DragAndDropDrawerSection />
+        <DraggableDrawerSection />
       </Drawer>
       <Main>
         {pages.map((page) => (
-          <Page page={page} />
+          <Page key={page.id} page={page} setPages={setPages} />
         ))}
       </Main>
     </div>
   );
 }
 
-function DragAndDropDrawerSection() {
-  const elementTypes = ["Text", "View"];
-  const [parentRef, values] = useDragAndDrop<ElementRef<"ul">, string>(
-    elementTypes
-  );
+function DraggableDrawerSection() {
+  const elementTypes = ["Text", "View"] as const;
   return (
-    <ul ref={parentRef}>
-      {values.map((type) => (
-        <div key={type} className={style["drawer-button"]}>{type}</div>
+    <>
+      {elementTypes.map((type) => (
+        <DraggableDrawerElement key={type} type={type}>
+          {type}
+        </DraggableDrawerElement>
       ))}
-    </ul>
+    </>
+  );
+}
+
+function DraggableDrawerElement({
+  type,
+  children,
+}: {
+  type: string;
+  children?: ReactNode;
+}) {
+  const handleDragStart: React.DragEventHandler<HTMLDivElement> = (ev) => {
+    // Add the target element's id to the data transfer object
+    console.log("is this working?");
+
+    ev.dataTransfer.setData(
+      "application/my-app",
+      JSON.stringify({
+        type,
+      })
+    );
+    ev.dataTransfer.effectAllowed = "move";
+  };
+
+  return (
+    <div
+      draggable="true"
+      className={style["drawer-button"]}
+      onDragStart={handleDragStart}
+    >
+      {children}
+    </div>
   );
 }
 

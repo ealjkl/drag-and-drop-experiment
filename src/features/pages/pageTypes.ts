@@ -1,9 +1,9 @@
 export type PageModel = {
   id: string;
-  elements: PageElement[];
+  elements: PageElementModel[];
 };
 
-export type PageElement = {
+export type PageElementModel = {
   id: string;
-  elements: [];
+  elements: PageElementModel[];
 };
